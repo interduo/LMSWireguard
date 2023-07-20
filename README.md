@@ -44,8 +44,11 @@ https://www.wireguard.com/install/
 
 1. Logujemy się:
 ![image](https://github.com/interduo/LMSWireguard/assets/17087236/cac7dd0b-58b7-42f5-953d-25ade7f43cdc)
+
 <br>
+
 2. Zrzucamy QRcode do pliku lub zaczytujemy QRcode urządzeniem mobilnym:
-![image](https://github.com/interduo/LMSWireguard/assets/17087236/79b087c9-2c36-4620-93ed-ed493cf5e18c)
+![image](https://github.com/interduo/LMSWireguard/assets/17087236/29327f13-f564-409c-86f3-ebb13470ffc8)
+
 
 
