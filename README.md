@@ -32,9 +32,9 @@ Instalacja (dla apache2):
 - konfigurujemy zmienne w pliku: wg_config.php,
 - systemctl restart apache2,
 - na koncentratorze tuneli Mikrotik
-/interface wireguard add listen-port=13231 mtu=1420 name=wg0
-/ip firewall filter add action=accept chain=input comment="Allow Wireguard from All" dst-port=13231 protocol=udp
-/ip address add address=172.20.20.1/24 comment="Wireguard Interface IP address" interface=wg0 network=172.20.20.0
+/interface wireguard add listen-port=13231 mtu=1420 name=wg0 \
+/ip firewall filter add action=accept chain=input comment="Allow Wireguard from All" dst-port=13231 protocol=udp \
+/ip address add address=172.20.20.1/24 comment="Wireguard Interface IP address" interface=wg0 network=172.20.20.0 \
 (adres IP ma być z utworzonej sieci w LMS i wpisany w configu wg_config.php)
 
 Na urządzeniu wchodzimy na stronę zdefiniowaną w ServerName (sites-enabled/lmswireguard-ssl.conf) w przykladzie wireguard.domena.pl
