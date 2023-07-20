@@ -1,0 +1,65 @@
+<html>
+	<style>
+	  body {
+		margin-left: auto;
+		margin-right: auto;
+		text-align: center;
+		width: 85%;
+	  }
+
+	  input.fields {
+		width: 12em;
+		margin-top: 0.2em;
+		margin-bottom: 0.2em;
+	  }
+
+	  #pass {
+	  	-webkit-text-security: square;
+	  }
+
+	  #hiddensubmit {
+		height: 0px;
+		width: 0px;
+		border: none;
+		padding: 0px;
+	  }
+	  #login {
+		border: 3px solid;
+	  }
+	  #submit {
+		margin-bottom: 1em;
+		width: 10em;
+	  }
+	  div {
+		display: block;
+		text-align: center;
+	  }
+	  div.checkboxes {
+		text-align: left;
+		width: 14em;
+		margin: auto;
+		padding-left: 3.5em;
+	  }
+	  div.inputs {
+		width: 12em;
+		margin: auto;
+		margin-bottom: 1em;
+	  }
+	</style>
+
+	<body>
+	<form id="login" action="wireguardset.php" method="POST">
+		<h2>Zakon templariuszy</h2>
+		<div class="inputs">
+			<input name="user" class="fields" id="user" placeholder="user" required/><br>
+			<input name="pass" class="fields" id="pass" placeholder="token" type="password" required/>
+		</div>
+		<div class="checkboxes">
+                    <input type="checkbox" name="regenerate" value="1"/>wygeneruj nowy<br>
+		    <input type="checkbox" name="download" value="1"/>pobierz<br>
+		    <input type="checkbox" name="intranetonly" value="1"/>tylko intranet
+		</div>
+		<br><input type="submit" name="submit" value="OK" id="submit"/>
+	</form>
+	</body>
+</html>
