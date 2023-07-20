@@ -1,12 +1,12 @@
 # LMSWireguard
-##### Generator tuneli Wireguard z poziomu WWW
+##### (re)Generator konfiguracji tuneli wireguard dla koncentratora Mikrotik z poziomu WWW
 ##### autor: Jarosław Kłopotek <jkl@interduo.pl>
 
 Wymaga paczek:
 - php-radius,
 - phpqrcode,
-- wireguard,
-- wireguard-tools,
+- wireguard (opcjonalnie),
+- wireguard-tools (opcjonalnie),
 
 Co robi skrypt:
 1. Tworzy konfigi dla tuneli wireguard
