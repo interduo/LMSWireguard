@@ -10,7 +10,7 @@ Wymaga paczek:
 
 Co robi skrypt:
 1. Tworzy konfigi dla tuneli wireguard
-2. W LMS dodaje komputer u wybranego
+2. W LMS dodaje komputer u wybranego klienta
 3. Dodaje zobowiązanie
 4. Robi przeładowanie
 5. Wgrywa konfig na koncentrator tuneli Mikrotik
