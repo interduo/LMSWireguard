@@ -2,12 +2,12 @@
 require 'vendor/autoload.php';
 
 function generate_wireguard_keypair() {
-	$keyPair = sodium_crypto_box_keypair();
+    $keyPair = sodium_crypto_box_keypair();
 
-	return array(
-	    'private' => base64_encode(sodium_crypto_box_secretkey($keyPair)),
-	    'public' => base64_encode(sodium_crypto_box_publickey($keyPair)),
-	);
+    return array(
+        'private' => base64_encode(sodium_crypto_box_secretkey($keyPair)),
+        'public' => base64_encode(sodium_crypto_box_publickey($keyPair)),
+    );
 }
 
 function createWireguardConfigs($email, $intranetonly) {
@@ -28,26 +28,26 @@ function createWireguardConfigs($email, $intranetonly) {
         '%%wg_client_privkey%%' => $wg_client_keypair['private'],
         '%%wg_client_pubkey%%' => $wg_client_keypair['public'],
         '%%wg_client_mail%%' => $email,
-        '%%wg_srv_ip%%' => $wg_srv_ip,
-        '%%wg_srv_port%%' => $wg_srv_port,
-        '%%wg_srv_pubkey%%' => $wg_srv_pubkey,
-        '%%wg_srv_allowedips%%' => $intranetonly ? $intranetips : '0.0.0.0/0',
-        '%%wg_srv_ifacename%%' => $wg_srv_ifacename,
+        '%%wg_srv_ip%%' => WGSRV_IP,
+        '%%wg_srv_port%%' => WGSRV_PORT_WG,
+        '%%wg_srv_pubkey%%' => WGSRV_PUBKEY,
+        '%%wg_srv_allowedips%%' => $intranet ? $intranetips : '0.0.0.0/0',
+        '%%wg_srv_ifacename%%' => WGSRV_IFACENAME,
         '%%wg_srv_operator_rem%%' => (empty($operator) ? '' : (empty($usertunel) ? '' : '/ip firewall address-list remove numbers=[find comment="' . $email . '"];')),
         '%%wg_srv_operator_add%%' => (empty($operator) ? '' : '/ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $email . '";'),
         '%%wg_srv_duplicate%%' => (empty($usertunel) ? '' : '/interface/wireguard/peers/remove numbers=[find comment="' . $email . '"];'),
     );
 
-    $wg_client_config = file_get_contents($template_client);
-    $wg_srv_config = file_get_contents($template_srv);
+    $wg_client_config = file_get_contents(TEMPLATE_CLIENT);
+    $wg_srv_config = file_get_contents(TEMPLATE_SRV);
 
     foreach ($podstawienia as $idx => $pd) {
         $wg_client_config = str_replace($idx, $pd, $wg_client_config);
         $wg_srv_config = str_replace($idx, $pd, $wg_srv_config);
     }
 
-    $filename_client = $script_dir . '/tunnels/' . 'client-vpn-config-' . $user . '.config';
-    $filename_srv = $script_dir . '/tunnels/' . 'mt-vpn-config-' . $user . '.rsc';
+    $filename_client = SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '.config';
+    $filename_srv = SCRIPT_DIR . '/tunnels/' . 'mt-vpn-config-' . $user . '.rsc';
     file_put_contents($filename_client, $wg_client_config);
     file_put_contents($filename_srv, $wg_srv_config);
 
@@ -80,14 +80,13 @@ function loginRadius($user, $pass, $radius_ip, $radius_port, $radius_secret) {
 }
 
 function show_config($user) {
-    $script_dir = '/skrypty/wireguard';
-    $output = file_get_contents($script_dir . '/tunnels/' . 'client-vpn-config-' . $user . '.config');
+    $output = file_get_contents(SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '.config');
     require("/usr/share/phpqrcode/phpqrcode.php");
 
     if (!empty($output)) {
         $tmpfile = '/tmp/qrcode-tmpfile';
-        $qrcode = QRcode::png($output, $tmpfile);
-	$qr_html = '<img src="data:image/png;base64,' . base64_encode(file_get_contents($tmpfile)) . '" />';
+        QRcode::png($output, $tmpfile);
+        $qr_html = '<img src="data:image/png;base64,' . base64_encode(file_get_contents($tmpfile)) . '" />';
     }
  
     return array(
