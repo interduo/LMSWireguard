@@ -57,12 +57,12 @@ switch($action) {
     default:
         $cfg = show_config($user);
         if (empty($download)) {
-            $podstawienia = array(
+            $podstawienia = [
                 '%%cfgfile%%' => $cfg['file'],
                 '%%cfgqr%%' => $cfg['qr'],
                 '%%user%%' => $user,
                 '%%srvconfig%%' => '', //file_get_contents($configs['filename_srv']),
-            );
+            ];
             $html = file_get_contents(TEMPLATE_HTML_RESULT);
 
             foreach ($podstawienia as $idx => $pd) {

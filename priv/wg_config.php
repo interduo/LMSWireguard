@@ -27,7 +27,7 @@ const RADIUS_IP = 'radius.interduo.pl';
 const RADIUS_PORT = 1812;
 const RADIUS_SECRET = 'A7rg4qYPu4ez';
 
-$operators = array(
+$operators = [
     'yarii',
     'booyas',
     'qbas',
@@ -36,4 +36,4 @@ $operators = array(
     'm.wagrodny',
     't.karczewski',
     'm.kobylka',
-);
+];

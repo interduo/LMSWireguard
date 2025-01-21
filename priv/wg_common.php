@@ -4,10 +4,10 @@ require 'vendor/autoload.php';
 function generate_wireguard_keypair() {
     $keyPair = sodium_crypto_box_keypair();
 
-    return array(
+    return [
         'private' => base64_encode(sodium_crypto_box_secretkey($keyPair)),
         'public' => base64_encode(sodium_crypto_box_publickey($keyPair)),
-    );
+    ];
 }
 
 function createWireguardConfigs($email, $intranetonly) {
@@ -23,7 +23,7 @@ function createWireguardConfigs($email, $intranetonly) {
 
     $wg_client_keypair = generate_wireguard_keypair();
 
-    $podstawienia = array(
+    $podstawienia = [
         '%%wg_client_ip%%' => $usertunel['ipa'],
         '%%wg_client_privkey%%' => $wg_client_keypair['private'],
         '%%wg_client_pubkey%%' => $wg_client_keypair['public'],
@@ -36,7 +36,7 @@ function createWireguardConfigs($email, $intranetonly) {
         '%%wg_srv_operator_rem%%' => (empty($operator) ? '' : (empty($usertunel) ? '' : '/ip firewall address-list remove numbers=[find comment="' . $email . '"];')),
         '%%wg_srv_operator_add%%' => (empty($operator) ? '' : '/ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $email . '";'),
         '%%wg_srv_duplicate%%' => (empty($usertunel) ? '' : '/interface/wireguard/peers/remove numbers=[find comment="' . $email . '"];'),
-    );
+    ];
 
     $wg_client_config = file_get_contents(TEMPLATE_CLIENT);
     $wg_srv_config = file_get_contents(TEMPLATE_SRV);
@@ -51,10 +51,10 @@ function createWireguardConfigs($email, $intranetonly) {
     file_put_contents($filename_client, $wg_client_config);
     file_put_contents($filename_srv, $wg_srv_config);
 
-    return array(
+    return [
         'filename_client' => $filename_client,
         'filename_srv' => $filename_srv,
-    );
+    ];
 }
 
 function loginRadius($user, $pass, $radius_ip, $radius_port, $radius_secret) {
@@ -73,10 +73,10 @@ function loginRadius($user, $pass, $radius_ip, $radius_port, $radius_secret) {
 
     $result = radius_send_request($radius);
 
-    return array(
+    return [
         'state' => $result == RADIUS_ACCESS_ACCEPT,
         'error' => radius_strerror($radius),
-    );
+    ];
 }
 
 function show_config($user) {
@@ -89,8 +89,8 @@ function show_config($user) {
         $qr_html = '<img src="data:image/png;base64,' . base64_encode(file_get_contents($tmpfile)) . '" />';
     }
  
-    return array(
+    return [
         'file' => $output,
         'qr' => empty($output) ? null : $qr_html,
-    );
+    ];
 }

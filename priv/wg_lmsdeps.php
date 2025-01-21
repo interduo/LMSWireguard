@@ -5,7 +5,7 @@ function lms_create_wireguard() {
     global $LMS, $DB, $wireguard_lms_netid, $vpnregexp, $wireguard_lms_customerid, $useremail;
     $wg_client_ip = $LMS->GetFirstFreeAddress($wireguard_lms_netid);
     $octets = explode('.', $wg_client_ip);
-    $params = array(
+    $params = [
         'name' => $vpnregexp . $octets[3],
         'ipaddr' => $wg_client_ip,
         'netid' => $wireguard_lms_netid,
@@ -18,7 +18,7 @@ function lms_create_wireguard() {
         'authtype' => 0,
         'chkmac' => 0,
         'halfduplex' => 0,
-    );
+    ];
 
     //Dodaje kompa w LMS
     $nodeid = $LMS->NodeAdd($params);
