@@ -6,8 +6,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("It's working.");
 }
 
-require_once('/skrypty/wireguard/priv/wg_config.php');
-require_once(SCRIPT_DIR . '/priv/wg_common.php');
+require('/opt/LMSWireguard/priv/wg_config.php');
+require(LMS_DIR . '/bin/script-options.php');
+require(SCRIPT_DIR . '/priv/wg_common.php');
 
 $poczatekdnia = strtotime("today", time());
 
@@ -17,22 +18,25 @@ $pass = filter_var($_POST['pass'], FILTER_SANITIZE_STRING);
 $regenerate = isset($_POST['regenerate']);
 $download = isset($_POST['download']);
 $intranetonly = isset($_POST['intranetonly']);
-$configurationid = empty($_POST['configurationid']) ? false : intval($_POST['configurationid']);
+$configurationid = empty($_POST['configurationid']) ? 1 : intval($_POST['configurationid']);
+
+if ($configurationid > 2) {
+    die('ERROR: limit dwóch tuneli per użytkownik!');
+}
 
 $loggedin = loginRadius($user, $pass, RADIUS_IP, RADIUS_PORT, RADIUS_SECRET);
 
 if (empty($loggedin['state'])) {
-    die('No access. Have a nice day from here! ' . $loggedin['error']);
+    die('ERROR: brak dostępu. Miłego dnia stąd! ' . $loggedin['error']);
 }
 
-require(SCRIPT_DIR . '/priv/wg_lmsdeps.php');
 $useremail = getUserEmail($user);
 
 if (empty($useremail)) {
-    die('ERROR: did not find LMS user email from radius login or user doesnt exists.');
+    die('ERROR: brak znalezionego adresu email użytkownika LMS lub użytkownik nie istnieje.');
 }
 
-$exists = getUserTunelNode($useremail);
+$exists = getUserTunelNode($useremail, $configurationid);
 $action = $regenerate ? (empty($exists) ? 'new' : 'replace') : 'show';
 
 if (!$regenerate && !$exists) {
@@ -41,27 +45,41 @@ if (!$regenerate && !$exists) {
 
 switch($action) {
     case 'new':
-        lms_create_wireguard();
+        lms_create_wireguard($useremail, $configurationid);
     case 'replace':
-        $configs = createWireguardConfigs($useremail, $intranetonly);
+        $configs = createWireguardConfigs($useremail, $intranetonly, $configurationid);
         $conn = ssh2_connect(WGSRV_IP, WGSRV_PORT_SSH);
         ssh2_auth_password($conn, WGSRV_LOGIN, WGSRV_PASS);
         $cmd = explode(';', file_get_contents($configs['filename_srv']));
-        foreach ($cmd as $c) {
-            if (!empty($c)) {
-                ssh2_exec($conn, $c);
-                sleep(3);
+
+	// Usuń komentarze i puste znaki z komend
+        $filteredCmd = [];
+	foreach ($cmd as $item) {
+            if ($item[0] !== '#') {
+                $filteredCmd[] = trim($item);
             }
         }
-    ssh2_disconnect($conn);
+	$lastElement = end($filteredCmd);
+        foreach ($filteredCmd as $c) {
+            if (!empty($c)) {
+                ssh2_exec($conn, $c);
+		if($c !== $lastElement) {
+                    sleep(3);
+		}
+            }
+        }
+    	ssh2_disconnect($conn);
     default:
-        $cfg = show_config($user);
+        $cfg = show_config($user, $configurationid);
         if (empty($download)) {
             $podstawienia = [
                 '%%cfgfile%%' => $cfg['file'],
                 '%%cfgqr%%' => $cfg['qr'],
                 '%%user%%' => $user,
-                '%%srvconfig%%' => '', //file_get_contents($configs['filename_srv']),
+                '%%wg_client_configurationid%%' => $configurationid,
+                //show server side config
+                //'%%srvconfig%%' => file_get_contents($configs['filename_srv']),
+                '%%srvconfig%%' => '',
             ];
             $html = file_get_contents(TEMPLATE_HTML_RESULT);
 
@@ -70,9 +88,9 @@ switch($action) {
             }
             print $html;
         } else {
-            header('Content-disposition: attachment; filename="WG.conf";');
+            header('Content-disposition: attachment; filename="WG-' . $configurationid . '-' . $poczatekdnia . '.conf";');
             header('Content-Type: application/octet-stream');
-            readfile($cfg['file']);
+            print $cfg['file'];
         }
 }
 

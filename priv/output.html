@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Wireguard Config for %%user%%</title>
+    <link rel="stylesheet" href="style.css">
+    <title>WIREGUARD config for %%user%%, ID: %%wg_client_configurationid%%</title>
 </head>
 
 <body>
-  <center>
   <pre style="display: none;">%%cfgfile%%</pre>
   <button onClick="copyToClipboard()">Kopiuj do schowka</button>
   <button onClick="downloadConfig()">Pobierz</button>
@@ -15,7 +15,8 @@
   %%cfgqr%%
   <hr>
   %%srvconfig%%
-  </center>
+  <button onClick="copyToClipboard()">Kopiuj do schowka</button>
+  <button onClick="downloadConfig()">Pobierz</button>
 </body>
 
 <script>
@@ -27,7 +28,7 @@
 function downloadConfig() {
     var content = document.querySelector('pre').innerHTML;
     var aaa = document.createElement('a');
-    aaa.setAttribute('download', 'WG.conf');
+    aaa.setAttribute('download', 'WG-%%poczatekdnia%%-%%wg_client_configurationid%%.conf');
     aaa.setAttribute('href', 'data:' + 'text/plain' + ';charset=utf-8,' + encodeURIComponent(content));
     aaa.click();
 }

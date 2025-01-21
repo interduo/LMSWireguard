@@ -13,32 +13,35 @@ function generate_wireguard_keypair() {
     ];
 }
 
-function createWireguardConfigs($email, $intranetonly) {
-    require('/skrypty/wireguard/priv/wg_config.php');
-    $usertunel = getUserTunelNode($email);
+function createWireguardConfigs($email, $intranetonly, $configurationid) {
+    $poczatekdnia = strtotime("today", time());
+    $usertunel = getUserTunelNode($email, $configurationid);
     $user = getUserLoginByEmail($email);
-    $operator = in_array($user, $operators);
+    $operator = in_array($user, LMS_USER_OPERATORS);
     $intranet = !empty($intranetonly);
 
     if (empty($usertunel)) {
-        die('Something wrong with LMS');
+        die('ERROR: coś złego z LMS');
     }
 
     $wg_client_keypair = generate_wireguard_keypair();
-
+    $wg_client_comment = $email . '-ID' . $configurationid;
     $podstawienia = [
+	'%%poczatekdnia%%' => $poczatekdnia,
+        '%%wg_client_configurationid%%' => $configurationid,
         '%%wg_client_ip%%' => $usertunel['ipa'],
         '%%wg_client_privkey%%' => $wg_client_keypair['private'],
         '%%wg_client_pubkey%%' => $wg_client_keypair['public'],
         '%%wg_client_mail%%' => $email,
+        '%%wg_client_comment%%' => $wg_client_comment,
         '%%wg_srv_ip%%' => WGSRV_IP,
         '%%wg_srv_port%%' => WGSRV_PORT_WG,
         '%%wg_srv_pubkey%%' => WGSRV_PUBKEY,
         '%%wg_srv_allowedips%%' => $intranet ? INTRANET_IPS : '0.0.0.0/0',
         '%%wg_srv_ifacename%%' => WGSRV_IFACENAME,
-        '%%wg_srv_operator_rem%%' => (empty($operator) ? '' : (empty($usertunel) ? '' : '/ip firewall address-list remove numbers=[find comment="' . $email . '"];')),
-        '%%wg_srv_operator_add%%' => (empty($operator) ? '' : '/ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $email . '";'),
-        '%%wg_srv_duplicate%%' => (empty($usertunel) ? '' : '/interface/wireguard/peers/remove numbers=[find comment="' . $email . '"];'),
+        '%%wg_srv_operator_rem%%' => (empty($operator) ? '' : (empty($usertunel) ? '' : '/ip firewall address-list remove numbers=[find comment="' . $wg_client_comment . '"];')),
+        '%%wg_srv_operator_add%%' => (empty($operator) ? '' : ' /ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $wg_client_comment . '";'),
+        '%%wg_srv_duplicate%%' => (empty($usertunel) ? '' : ' /interface/wireguard/peers/remove numbers=[find name="' . $wg_client_comment . '"];'),
     ];
 
     $wg_client_config = file_get_contents(TEMPLATE_CLIENT);
@@ -49,8 +52,8 @@ function createWireguardConfigs($email, $intranetonly) {
         $wg_srv_config = str_replace($idx, $pd, $wg_srv_config);
     }
 
-    $filename_client = SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '.config';
-    $filename_srv = SCRIPT_DIR . '/tunnels/' . 'mt-vpn-config-' . $user . '.rsc';
+    $filename_client = SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '-' . $configurationid . '.config';
+    $filename_srv = SCRIPT_DIR . '/tunnels/' . 'mt-vpn-config-' . $user . '-' . $configurationid . '.rsc';
     file_put_contents($filename_client, $wg_client_config);
     file_put_contents($filename_srv, $wg_srv_config);
 
@@ -82,22 +85,123 @@ function loginRadius($user, $pass, $radius_ip, $radius_port, $radius_secret) {
     ];
 }
 
-function show_config($user) {
-    $output = file_get_contents(SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '.config');
+function show_config($user, $configurationid) {
+    $fullpath = SCRIPT_DIR . '/tunnels/'
+        . 'client-vpn-config-' . $user . '-' . $configurationid . '.config';
+    $output = file_get_contents($fullpath);
+
+    if (empty($output)) {
+        return;
+    }
 
     $options = new QROptions([
-        'eccLevel' => QRCode::EccLevel::L,
-        'size'     => 3,
+        'eccLevel' => QRCode::ECC_Q,
+        'margin' => 15,
     ]);
 
-    new QRCode($options);
+    $qr_html = '<img id="qrcode" src="'
+        . (new QRCode($options))->render($output) . '" alt="QRCode"/>';
 
-    if (!empty($output)) {
-        $qr_html = '<img src="' . (new QRCode)->render($output) . '" alt="QRCode"/>';
-    }
- 
     return [
         'file' => $output,
+        'fullpath' => $fullpath,
         'qr' => empty($output) ? null : $qr_html,
     ];
+}
+
+//LMSDEPS
+function lms_create_wireguard($useremail, $configurationid) {
+    global $DB, $AUTH, $SYSLOG, $poczatekdnia;
+    $LMS = new LMS($DB, $AUTH, $SYSLOG);
+
+    $wg_client_ip = $LMS->GetFirstFreeAddress(LMS_NETID_VPN);
+    $octets = explode('.', $wg_client_ip);
+
+    $params = [
+        'name' => LMS_NODE_VPN_REGEXP . $octets[3] . '-ID' . $configurationid,
+        'ipaddr' => $wg_client_ip,
+        'netid' => LMS_NETID_VPN,
+        'ipaddr_pub' => '0.0.0.0',
+        'info' => $useremail . '-ID' . $configurationid,
+        'ownerid' => LMS_CUSTOMERID_VPN,
+        'passwd' => '',
+        'access' => 1,
+        'warning' => 0,
+        'authtype' => 0,
+        'chkmac' => 0,
+        'halfduplex' => 0,
+        'linktype' => 2,
+	'linkspeed' => 1000000,
+	'macs' => [ '00:00:00:00:00:00' ],
+    ];
+
+    //Dodaje kompa w LMS
+    $nodeid = $LMS->NodeAdd($params);
+    ///$argv = [
+    ///     'customerid' => LMS_CUSTOMERID_VPN,
+    ///     'tariffid' => LMS_TARIFFID_VPN,
+    ///     'datefrom' => $poczatekdnia,
+    ///     'period' => 3,
+    ///     'at' => 1,
+    ///     'note' => $params['info'],
+    ///     'nodes' => $nodeid,
+    ///  ];
+    ///$LMS->AddAssignment($argv);
+    $DB->Execute(
+        'INSERT INTO assignments (customerid, tariffid, datefrom, period, at, note) VALUES (?, ?, ?, ?, ?, ?)',
+        array(
+            LMS_CUSTOMERID_VPN,
+            LMS_TARIFFID_VPN,
+            $poczatekdnia,
+            3,
+            1,
+            $params['info']
+        )
+    );
+    $assignmentid = $DB->getLastInsertId('assignments');
+
+    //Dodaje taryfę dla konta VPN
+    $DB->Execute(
+        'INSERT INTO nodeassignments (nodeid, assignmentid) VALUES (?, ?)',
+        array(
+            $nodeid,
+            $assignmentid
+        )
+    );
+    //$LMS->insertNodeAssignment();
+    return null;
+}
+
+function getUserEmail($login) {
+    global $DB;
+    return $DB->GetOne(
+        'SELECT email FROM users WHERE login = ?',
+        array($login)
+    );
+}
+
+function getUserLoginByEmail($email) {
+    global $DB;
+    return $DB->GetOne(
+        'SELECT login FROM users WHERE email = ?',
+        array($email)
+    );
+}
+
+function getUserTunelNode($email, $configurationid) {
+    global $DB;
+    $nodename = LMS_NODE_VPN_REGEXP . '%-ID' . $configurationid;
+    $nodeinfo = $email . '-ID' . $configurationid;
+
+    return $DB->GetRow('
+        SELECT id, name, info, INET_NTOA(ipaddr) AS ipa
+            FROM nodes
+        WHERE
+            name LIKE ?
+            AND info LIKE ?',
+        array(
+            $nodename,
+            $nodeinfo,
+        )
+    );
 }

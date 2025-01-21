@@ -1,69 +1,42 @@
 <html>
-	<head>
-		<link rel="stylesheet" href="style.css">
-		<meta charset="utf-8"/>
-		<meta http-equiv="content-language" content="pl-pl">
-	</head>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <meta charset="utf-8"/>
+        <meta http-equiv="content-language" content="pl-pl">
+    </head>
 
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-		const form = document.getElementById('login');
-		const submitButton = document.getElementById('submit');
-		const inputs = form.querySelectorAll('input[required]');
+    <script src="wireguard.js"></script>
 
-		function checkForm() {
-		    let allValid = true;
+    <body>
+        <form id="login" action="wireguardset.php" method="POST">
+        <h2>Zakon templariuszy</h2>
 
-		    inputs.forEach(input => {
-		        if (!input.checkValidity()) {
-                	    allValid = false;
-	            	}
-        	    });
+        <div class="column">
+            <img src="templariusze.jpg">
+        </div>
 
-        	    submitButton.disabled = !allValid;
-    		}
+        <div class="column">
+            <div class="inputs">
+                <input name="user" class="fields" id="user" placeholder="user" required>
+                <input name="pass" class="fields" id="pass" placeholder="token" type="password" required>
+            </div>
 
-    		inputs.forEach(input => {
-        		input.addEventListener('input', checkForm);
-    		});
+            <div class="checkboxes">
+                <fieldset>
+                    <legend>Identyfikator</legend>
+                    <div class="check"><input type="radio" name="configurationid" value="1" required>ID1</div>
+                    <div class="check"><input type="radio" name="configurationid" value="2" required>ID2</div>
+                </fieldset>
 
-    		checkForm();
-		});
-	</script>
+                <fieldset>
+                    <legend>Właściwości</legend>
+                    <div class="check"><input type="checkbox" name="regenerate" value="1">nowy tunel</div>
+                    <div class="check"><input type="checkbox" name="intranetonly" value="1">tylko intranet</div>
+                </fieldset>
+            </div>
 
-	<body>
-	    <form id="login" action="wireguardset.php" method="POST">
-		<h2>Zakon templariuszy</h2>
-
-		<div class="column">
-			<img src="templariusze.jpg">
-		</div>
-
-		<div class="column">
-
-	        <div class="inputs">
-			<input name="user" class="fields" id="user" placeholder="user" required/>
-			<input name="pass" class="fields" id="pass" placeholder="token" type="password" required/>
-		</div>
-
-		<div class="checkboxes">
-		    <fieldset>
-			<legend>Typ</legend>
-		    	<div class="check"><input type="radio" name="configurationid" value="0" checked>główny</div>
-		    	<div class="check"><input type="radio" name="configurationid" value="1">dodatkowy</div>
-		    </fieldset>
-
-		    <fieldset>
-			<legend>Właściwości</legend>
-                        <div class="check"><input type="checkbox" name="regenerate" value="1"/>nowy tunel</div>
-		        <div class="check"><input type="checkbox" name="download" value="1"/>jako plik</div>
-		        <div class="check"><input type="checkbox" name="intranetonly" value="1"/>tylko intranet</div>
-		    </fieldset>
-		</div>
-
-		<input type="submit" name="submit" value="OK" id="submit"/>
-
-		</div>
-	    </form>
-	</body>
+            <input type="submit" name="submit" value="OK" id="submit">
+        </div>
+        </form>
+    </body>
 </html>

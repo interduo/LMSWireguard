@@ -67,3 +67,8 @@ div.column {
 legend {
     font-weight: bolder;
 }
+
+img#qrcode {
+    width: 350px;
+}
+
