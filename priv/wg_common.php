@@ -31,7 +31,7 @@ function createWireguardConfigs($email, $intranetonly) {
         '%%wg_srv_ip%%' => WGSRV_IP,
         '%%wg_srv_port%%' => WGSRV_PORT_WG,
         '%%wg_srv_pubkey%%' => WGSRV_PUBKEY,
-        '%%wg_srv_allowedips%%' => $intranet ? $intranetips : '0.0.0.0/0',
+        '%%wg_srv_allowedips%%' => $intranet ? INTRANET_IPS : '0.0.0.0/0',
         '%%wg_srv_ifacename%%' => WGSRV_IFACENAME,
         '%%wg_srv_operator_rem%%' => (empty($operator) ? '' : (empty($usertunel) ? '' : '/ip firewall address-list remove numbers=[find comment="' . $email . '"];')),
         '%%wg_srv_operator_add%%' => (empty($operator) ? '' : '/ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $email . '";'),
