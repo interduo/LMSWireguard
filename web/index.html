@@ -1,0 +1,131 @@
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta http-equiv="content-language" content="pl-pl">
+	</head>
+
+	<style>
+	  body {
+		margin-left: auto;
+		margin-right: auto;
+		text-align: center;
+		width: 85%;
+		min-width: 520px;
+	  }
+
+	  input.fields {
+		width: 12em;
+		margin-top: 0.2em;
+		margin-bottom: 0.2em;
+	  }
+	  #pass {
+	  	-webkit-text-security: square;
+	  }
+
+	  #hiddensubmit {
+		height: 0px;
+		width: 0px;
+		border: none;
+		padding: 0px;
+	  }
+	  #submit {
+		margin-top: 1em;
+		margin-bottom: 1em;
+		width: 12em;
+	  }
+	  div {
+		display: block;
+		text-align: center;
+	  }
+	  div.checkboxes {
+		text-align: left;
+		width: 14em;
+		margin: auto;
+		padding-left: 3.5em;
+	  }
+	  div.check {	
+		display: flex;
+		align-items: center;
+	  }
+	  div.inputs {
+		width: 12em;
+		margin: auto;
+		margin-bottom: 1em;
+	  }
+	  div.column {
+	      float: left;
+	      width: 50%;
+	      text-align: center;
+	  }
+	  #login {
+		border: 3px solid;
+		height: 450px;
+		overflow: hidden;
+	  }
+	  legend {
+		font-weight: bolder;
+	  }
+	</style>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+		const form = document.getElementById('login');
+		const submitButton = document.getElementById('submit');
+		const inputs = form.querySelectorAll('input[required]');
+
+		function checkForm() {
+		    let allValid = true;
+
+		    inputs.forEach(input => {
+		        if (!input.checkValidity()) {
+                	    allValid = false;
+	            	}
+        	    });
+
+        	    submitButton.disabled = !allValid;
+    		}
+
+    		inputs.forEach(input => {
+        		input.addEventListener('input', checkForm);
+    		});
+
+    		checkForm();
+		});
+	</script>
+
+	<body>
+	    <form id="login" action="wireguardset.php" method="POST">
+		<h2>Zakon templariuszy</h2>
+
+		<div class="column">
+			<img src="templariusze.jpg">
+		</div>
+
+		<div class="column">
+
+	        <div class="inputs">
+			<input name="user" class="fields" id="user" placeholder="user" required/>
+			<input name="pass" class="fields" id="pass" placeholder="token" type="password" required/>
+		</div>
+
+		<div class="checkboxes">
+		    <fieldset>
+			<legend>Typ</legend>
+		    	<div class="check"><input type="radio" name="configurationid" value="0" checked>główny</div>
+		    	<div class="check"><input type="radio" name="configurationid" value="1">dodatkowy</div>
+		    </fieldset>
+
+		    <fieldset>
+			<legend>Właściwości</legend>
+                        <div class="check"><input type="checkbox" name="regenerate" value="1"/>nowy tunel</div>
+		        <div class="check"><input type="checkbox" name="download" value="1"/>jako plik</div>
+		        <div class="check"><input type="checkbox" name="intranetonly" value="1"/>tylko intranet</div>
+		    </fieldset>
+		</div>
+
+		<input type="submit" name="submit" value="OK" id="submit"/>
+
+		</div>
+	    </form>
+	</body>
+</html>

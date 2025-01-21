@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Wireguard Config for %%user%%</title>
+</head>
+
+<body>
+  <center>
+  <pre style="display: none;">%%cfgfile%%</pre>
+  <button onClick="copyToClipboard()">Kopiuj do schowka</button>
+  <button onClick="downloadConfig()">Pobierz</button>
+  <hr>
+  %%cfgqr%%
+  <hr>
+  %%srvconfig%%
+  </center>
+</body>
+
+<script>
+  function copyToClipboard (containerid) {
+      var copyText = document.querySelector('pre').innerHTML;
+      navigator.clipboard.writeText(copyText);
+  }
+
+function downloadConfig() {
+    var content = document.querySelector('pre').innerHTML;
+    var aaa = document.createElement('a');
+    aaa.setAttribute('download', 'WG.conf');
+    aaa.setAttribute('href', 'data:' + 'text/plain' + ';charset=utf-8,' + encodeURIComponent(content));
+    aaa.click();
+}
+
+document.addEventListener('keydown', (e) => {
+    e = e || window.event;
+    if(e.keyCode == 116){
+        e.preventDefault();
+    }
+});
+
+</script>
+</html>
