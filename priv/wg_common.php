@@ -1,6 +1,9 @@
 <?php
 require 'vendor/autoload.php';
 
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+
 function generate_wireguard_keypair() {
     $keyPair = sodium_crypto_box_keypair();
 
@@ -81,12 +84,16 @@ function loginRadius($user, $pass, $radius_ip, $radius_port, $radius_secret) {
 
 function show_config($user) {
     $output = file_get_contents(SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '.config');
-    require("/usr/share/phpqrcode/phpqrcode.php");
+
+    $options = new QROptions([
+        'eccLevel' => QRCode::EccLevel::L,
+        'size'     => 3,
+    ]);
+
+    new QRCode($options);
 
     if (!empty($output)) {
-        $tmpfile = '/tmp/qrcode-tmpfile';
-        QRcode::png($output, $tmpfile);
-        $qr_html = '<img src="data:image/png;base64,' . base64_encode(file_get_contents($tmpfile)) . '" />';
+        $qr_html = '<img src="' . (new QRCode)->render($output) . '" alt="QRCode"/>';
     }
  
     return [
