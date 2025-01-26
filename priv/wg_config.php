@@ -8,14 +8,14 @@ const INTRANET_IPS = '10.0.0.0/8, 172.16.0.0/12, 46.151.184.0/21';
 //lms
 const LMS_DIR = '/var/www/html/lms';
 const LMS_NODE_VPN_REGEXP = 'WIREGUARD-VPN-';
-const LMS_CUSTOMERID_VPN = 1384;
-const LMS_NETID_VPN = 911;
-const LMS_TARIFFID_VPN = 96;
+const LMS_CUSTOMERID_VPN = 1111;
+const LMS_NETID_VPN = 999;
+const LMS_TARIFFID_VPN = 88;
 
 //mikrotik wireguard
 const WGSRV_IP = 'wg.domena.pl';
 const WGSRV_PORT_WG = '34715';
-const WGSRV_PORT_SSH = '5455';
+const WGSRV_PORT_SSH = '22';
 const WGSRV_LOGIN = 'jakistamlogin';
 const WGSRV_PASS = 'jakiestamhaslo';
 const WGSRV_PUBKEY = 'PUBLICZNY-KLUCZ';
