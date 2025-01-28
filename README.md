@@ -51,3 +51,5 @@ https://www.wireguard.com/install/
 2. Zrzucamy konfig do pliku lub zaczytujemy QRcode urządzeniem mobilnym:\
 ![image](https://github.com/interduo/LMSWireguard/assets/17087236/29327f13-f564-409c-86f3-ebb13470ffc8)
 
+Po co?
+By mieć bezpieczne tunele VPN i nie zajmować się regeneracją konfigów i ich wydawaniem.
