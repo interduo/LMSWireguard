@@ -9,8 +9,8 @@ const INTRANET_IPS = '10.0.0.0/8, 172.16.0.0/12, 46.151.184.0/21';
 const LMS_DIR = '/var/www/html/lms';
 const LMS_NODE_VPN_REGEXP = 'WIREGUARD-VPN-';
 const LMS_CUSTOMERID_VPN = 1111;
-const LMS_NETID_VPN = 999;
-const LMS_TARIFFID_VPN = 88;
+const LMS_NETID_VPN = 222;
+const LMS_TARIFFID_VPN = 33;
 
 //mikrotik wireguard
 const WGSRV_IP = 'wg.domena.pl';

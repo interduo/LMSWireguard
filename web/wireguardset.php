@@ -14,7 +14,6 @@ $poczatekdnia = strtotime("today", time());
 
 $user = filter_var($_POST['user'], FILTER_SANITIZE_STRING);
 $pass = filter_var($_POST['pass'], FILTER_SANITIZE_STRING);
-
 $regenerate = isset($_POST['regenerate']);
 $download = isset($_POST['download']);
 $intranetonly = isset($_POST['intranetonly']);
@@ -25,13 +24,11 @@ if ($configurationid > 2) {
 }
 
 $loggedin = loginRadius($user, $pass, RADIUS_IP, RADIUS_PORT, RADIUS_SECRET);
-
 if (empty($loggedin['state'])) {
     die('ERROR: brak dostępu. Miłego dnia stąd! ' . $loggedin['error']);
 }
 
 $useremail = getUserEmail($user);
-
 if (empty($useremail)) {
     die('ERROR: brak znalezionego adresu email użytkownika LMS lub użytkownik nie istnieje.');
 }
@@ -94,4 +91,4 @@ switch($action) {
         }
 }
 
-shell_exec('/skrypty/przeladuj_node.sh ' . $exists['ipa'] . ' 2>&1');
+shell_exec('sudo /opt/LMSWireguard/reload_node.sh ' . $exists['ipa'] . ' 2>&1');

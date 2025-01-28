@@ -6,7 +6,6 @@ use chillerlan\QRCode\QROptions;
 
 function generate_wireguard_keypair() {
     $keyPair = sodium_crypto_box_keypair();
-
     return [
         'private' => base64_encode(sodium_crypto_box_secretkey($keyPair)),
         'public' => base64_encode(sodium_crypto_box_publickey($keyPair)),
@@ -26,6 +25,7 @@ function createWireguardConfigs($email, $intranetonly, $configurationid) {
 
     $wg_client_keypair = generate_wireguard_keypair();
     $wg_client_comment = $email . '-ID' . $configurationid;
+
     $podstawienia = [
 	'%%poczatekdnia%%' => $poczatekdnia,
         '%%wg_client_configurationid%%' => $configurationid,
@@ -38,10 +38,10 @@ function createWireguardConfigs($email, $intranetonly, $configurationid) {
         '%%wg_srv_port%%' => WGSRV_PORT_WG,
         '%%wg_srv_pubkey%%' => WGSRV_PUBKEY,
         '%%wg_srv_allowedips%%' => $intranet ? INTRANET_IPS : '0.0.0.0/0',
-        '%%wg_srv_ifacename%%' => WGSRV_IFACENAME,
-        '%%wg_srv_operator_rem%%' => (empty($operator) ? '' : (empty($usertunel) ? '' : '/ip firewall address-list remove numbers=[find comment="' . $wg_client_comment . '"];')),
-        '%%wg_srv_operator_add%%' => (empty($operator) ? '' : ' /ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $wg_client_comment . '";'),
-        '%%wg_srv_duplicate%%' => (empty($usertunel) ? '' : ' /interface/wireguard/peers/remove numbers=[find name="' . $wg_client_comment . '"];'),
+	'%%wg_srv_ifacename%%' => WGSRV_IFACENAME,
+	'%%wg_srv_operator_rem%%' => $operator ? '/ip firewall address-list remove numbers=[find comment="' . $wg_client_comment . '"];' : '',
+        '%%wg_srv_operator_add%%' => $operator ? '/ip firewall address-list add list=vlan997_acl address="' . $usertunel['ipa'] . '" comment="' . $wg_client_comment . '";' : '',
+        '%%wg_srv_duplicate%%' => $usertunel ? ' /interface/wireguard/peers/remove numbers=[find name="' . $wg_client_comment . '"];' : '',
     ];
 
     $wg_client_config = file_get_contents(TEMPLATE_CLIENT);
@@ -54,6 +54,7 @@ function createWireguardConfigs($email, $intranetonly, $configurationid) {
 
     $filename_client = SCRIPT_DIR . '/tunnels/' . 'client-vpn-config-' . $user . '-' . $configurationid . '.config';
     $filename_srv = SCRIPT_DIR . '/tunnels/' . 'mt-vpn-config-' . $user . '-' . $configurationid . '.rsc';
+
     file_put_contents($filename_client, $wg_client_config);
     file_put_contents($filename_srv, $wg_srv_config);
 
@@ -86,8 +87,7 @@ function loginRadius($user, $pass, $radius_ip, $radius_port, $radius_secret) {
 }
 
 function show_config($user, $configurationid) {
-    $fullpath = SCRIPT_DIR . '/tunnels/'
-        . 'client-vpn-config-' . $user . '-' . $configurationid . '.config';
+    $fullpath = SCRIPT_DIR . '/tunnels/client-vpn-config-' . $user . '-' . $configurationid . '.config';
     $output = file_get_contents($fullpath);
 
     if (empty($output)) {
@@ -105,7 +105,7 @@ function show_config($user, $configurationid) {
     return [
         'file' => $output,
         'fullpath' => $fullpath,
-        'qr' => empty($output) ? null : $qr_html,
+        'qr' => $qr_html,
     ];
 }
 
@@ -132,41 +132,41 @@ function lms_create_wireguard($useremail, $configurationid) {
         'halfduplex' => 0,
         'linktype' => 2,
 	'linkspeed' => 1000000,
-	'macs' => [ '00:00:00:00:00:00' ],
+	'macs' => ['00:00:00:00:00:00'],
     ];
 
     //Dodaje kompa w LMS
     $nodeid = $LMS->NodeAdd($params);
-    ///$argv = [
-    ///     'customerid' => LMS_CUSTOMERID_VPN,
-    ///     'tariffid' => LMS_TARIFFID_VPN,
-    ///     'datefrom' => $poczatekdnia,
-    ///     'period' => 3,
-    ///     'at' => 1,
-    ///     'note' => $params['info'],
-    ///     'nodes' => $nodeid,
-    ///  ];
-    ///$LMS->AddAssignment($argv);
+    $argv = [
+         'customerid' => LMS_CUSTOMERID_VPN,
+         'tariffid' => LMS_TARIFFID_VPN,
+         'datefrom' => $poczatekdnia,
+         'period' => 3,
+         'at' => 1,
+         'note' => $params['info'],
+         'nodes' => $nodeid,
+      ];
+    //$LMS->AddAssignment($argv);
     $DB->Execute(
         'INSERT INTO assignments (customerid, tariffid, datefrom, period, at, note) VALUES (?, ?, ?, ?, ?, ?)',
-        array(
-            LMS_CUSTOMERID_VPN,
-            LMS_TARIFFID_VPN,
-            $poczatekdnia,
-            3,
-            1,
-            $params['info']
-        )
+        [
+            $argv['customerid'],
+            $argv['tariffid'],
+            $argv['datefrom'],
+            $argv['period'],
+            $argv['at'],
+            $argv['note'],
+	]
     );
     $assignmentid = $DB->getLastInsertId('assignments');
 
-    //Dodaje taryfę dla konta VPN
+    //Dodaje przypisanie komputera konta VPN do taryfy
     $DB->Execute(
         'INSERT INTO nodeassignments (nodeid, assignmentid) VALUES (?, ?)',
-        array(
+        [
             $nodeid,
             $assignmentid
-        )
+	]
     );
     //$LMS->insertNodeAssignment();
     return null;
@@ -176,7 +176,7 @@ function getUserEmail($login) {
     global $DB;
     return $DB->GetOne(
         'SELECT email FROM users WHERE login = ?',
-        array($login)
+        [$login]
     );
 }
 
@@ -184,7 +184,7 @@ function getUserLoginByEmail($email) {
     global $DB;
     return $DB->GetOne(
         'SELECT login FROM users WHERE email = ?',
-        array($email)
+        [$email]
     );
 }
 
@@ -194,14 +194,14 @@ function getUserTunelNode($email, $configurationid) {
     $nodeinfo = $email . '-ID' . $configurationid;
 
     return $DB->GetRow('
-        SELECT id, name, info, INET_NTOA(ipaddr) AS ipa
+        SELECT id, name, info, inet_ntoa(ipaddr) AS ipa
             FROM nodes
         WHERE
             name LIKE ?
             AND info LIKE ?',
-        array(
+        [
             $nodename,
             $nodeinfo,
-        )
+	]
     );
 }

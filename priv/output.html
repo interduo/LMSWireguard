@@ -28,11 +28,13 @@
 function downloadConfig() {
     var content = document.querySelector('pre').innerHTML;
     var aaa = document.createElement('a');
-    aaa.setAttribute('download', 'WG-%%poczatekdnia%%-%%wg_client_configurationid%%.conf');
+    var poczatekdnia = Date.now();
+    aaa.setAttribute('download', 'WG-' + poczatekdnia + '-%%wg_client_configurationid%%.conf');
     aaa.setAttribute('href', 'data:' + 'text/plain' + ';charset=utf-8,' + encodeURIComponent(content));
     aaa.click();
 }
 
+// blokuj nacisniecia F5
 document.addEventListener('keydown', (e) => {
     e = e || window.event;
     if(e.keyCode == 116){
