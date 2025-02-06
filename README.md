@@ -2,17 +2,17 @@
 ##### (re)Generator konfiguracji tuneli wireguard dla koncentratora Mikrotik z poziomu WWW
 ##### autor: Jarosław Kłopotek <jkl@interduo.pl>
 
-Wymaga paczek:
+**Wymaga paczek:**
 - php-radius,
 
-Co robi skrypt:
+**Co robi skrypt:**
 1. Tworzy konfigi dla tuneli wireguard
 2. W LMS dodaje komputer u zdefiniowanego klienta
 3. Dodaje zobowiązanie
 4. Wgrywa konfig na koncentrator tuneli Mikrotik
 5. Wykonuje przeładowanie kolejkowania
 
-Zaimplementowane funkcje:
+**Zaimplementowane funkcje:**
 - logowanie po Radiusie jako autoryzacja,
 - możliwość ponownego podejrzenia konfiga,
 - generator kodów QR do zaczytania konfiguracji tunelu na urządzenia mobile,
@@ -20,7 +20,7 @@ Zaimplementowane funkcje:
 - możliwość wygenerowania dwóch konfiguracji dla użytkownika,
 - możliwość wygenerowania konfiguracji tunelu z routingiem tylko do zdefiniowanych podsieci/intranet przez tunel,
 
-Instalacja (dla apache2):
+**Instalacja (dla apache2):**
 - git clone https://github.com/interduo/LMSWireguard /opt/LMSWireguard
 - cd /opt/LMSWireguard/priv
 - composer install
@@ -38,7 +38,7 @@ Instalacja (dla apache2):
 /ip address add address=172.20.20.1/24 comment="Wireguard Interface IP address" interface=wg0 network=172.20.20.0 \
 (adres IP ma być z utworzonej sieci w LMS)
 
-Na urządzeniu wchodzimy na stronę zdefiniowaną w ServerName (sites-enabled/apache2-vhost-wireguard.conf) w przykladzie http://wireguardlms.domena.pl
+Na urządzeniu wchodzimy na stronę http://wireguardlms.domena.pl (zdefiniowaną w sites-enabled/apache2-vhost-wireguard.conf)
 
 Pobieramy klienta tuneli wireguard:
 https://www.wireguard.com/install/
